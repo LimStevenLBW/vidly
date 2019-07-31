@@ -1,9 +1,13 @@
 import React, { Component } from "react";
 import { getMovies } from "../services/fakeMovieService";
+import Pagination from "./common/Pagination";
+import Like from "./common/Like";
 
 class Movies extends Component {
     state = {
-        movies: getMovies()
+        movies: getMovies(),
+        pageSize: 4,
+        currentPage: 1,
     }
     /*
         OnClick handler to delete movies from the displayed table
@@ -16,8 +20,25 @@ class Movies extends Component {
         this.setState({ movies })
     }
 
+    handlePageChange = page => {
+        this.setState({currentPage: page})
+    }
+
+    handleLike = (movie) => {
+        //Take a copy and give it to the set state method
+        //We don't want to modify movies directly, it's an array of objects
+        const moviesArr = [...this.state.movies];
+        const index = moviesArr.indexOf(movie);
+        moviesArr[index] = { ...moviesArr[index] }
+        moviesArr[index].liked = !moviesArr[index].liked;
+        this.setState({ movies: moviesArr })
+    };
+
     render() {
+        //object destructuring
         const { length: count } = this.state.movies;
+        const {pageSize, currentPage} = this.state;
+
         if (count === 0) {
             return <p>
                 Looks like there aren't any movies in the database
@@ -34,6 +55,7 @@ class Movies extends Component {
                             <th>Stock</th>
                             <th>Rate</th>
                             <th />
+                            <th />
                         </tr>
                     </thead>
 
@@ -45,6 +67,9 @@ class Movies extends Component {
                                 <td>{movie.numberInStock}</td>
                                 <td>{movie.dailyRentalRate}</td>
                                 <td>
+                                    <Like liked={movie.liked} onClick={() => this.handleLike(movie)} />
+                                </td>
+                                <td>
                                     <button onClick={() => this.handleDelete(movie)} className="btn btn-danger btn-sm">Delete</button>
                                 </td>
                             </tr>
@@ -52,6 +77,13 @@ class Movies extends Component {
 
                     </tbody>
                 </table>
+
+                <Pagination 
+                    itemsCount={count} 
+                    pageSize={pageSize} 
+                    onPageChange={this.handlePageChange}
+                    currentPage = {currentPage}
+                 />
             </React.Fragment>
         );
     }
