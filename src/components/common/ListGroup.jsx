@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 //BootStrap ListGroup component
 const ListGroup = (props) => {
     //Decoupled to use any json list

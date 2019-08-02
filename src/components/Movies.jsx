@@ -5,7 +5,7 @@ import Pagination from "./common/Pagination";
 import ListGroup from "./common/ListGroup";
 import { paginate } from '../utils/paginate';
 import MoviesTable from "./MoviesTable";
-
+import _ from 'lodash';
 
 class Movies extends Component {
     state = {
@@ -13,14 +13,15 @@ class Movies extends Component {
         pageSize: 4,
         currentPage: 1,
         genres: [],
-        selectedGenre: null
+        selectedGenre: null,
+        sortColumn: { path: 'title', order: 'asc' }
     }
 
     //When an instance of this component is rendered in the dom, trigger
     componentDidMount() {
         //Movies and Genres were initialized to empty arrays at first to ensure they were not undefined, once a server response
         //is acquired, we update the component state, include an All Genres Filter
-        const genres = [{ name: 'All Genres' }, ...getGenres()];
+        const genres = [{ _id: '', name: 'All Genres' }, ...getGenres()];
         this.setState({ movies: getMovies(), genres })
     }
     /*
@@ -53,18 +54,35 @@ class Movies extends Component {
         this.setState({ selectedGenre: genre, currentPage: 1 })
     }
 
+    handleSort = (path) => {
+        const sortColumn = { ...this.state.sortColumn }
+        //If Match Found, Flip the sorting order
+        if (sortColumn.path === path) {
+            sortColumn.order = (sortColumn.order === 'asc') ? 'desc' : 'asc';
+        } else {
+            sortColumn.path = path;
+            sortColumn.order = 'asc';
+        }
+        this.setState({ sortColumn });
+    }
+
     render() {
         //object destructuring
         //const { length: count } = this.state.movies;
-        const { pageSize, currentPage, movies: allMovies, selectedGenre } = this.state;
+        const { pageSize, currentPage, movies: allMovies, selectedGenre, sortColumn } = this.state;
 
+        /*Steps, Filter, Sort, and then Paginate */
         //If there is a selected genre(All Genres doesnt have an id), implement a filter
         const filteredMovies = selectedGenre && selectedGenre._id ?
             allMovies.filter(movie => movie.genre._id === selectedGenre._id)
             : allMovies
 
-        const movies = paginate(filteredMovies, currentPage, pageSize);
+        //Sort the list
+        const sortedArray = _.orderBy(filteredMovies, [sortColumn.path], [sortColumn.order]);
+        //Paaginate the list
+        const movies = paginate(sortedArray, currentPage, pageSize);
 
+        //Display if no movies are available in the list
         if (filteredMovies.length === 0) {
             return <p>
                 Looks like there aren't any movies in the database
@@ -87,6 +105,7 @@ class Movies extends Component {
                         movies={movies}
                         onDelete={this.handleDelete}
                         onLike={this.handleLike}
+                        onSort={this.handleSort}
                     />
 
                     <Pagination
