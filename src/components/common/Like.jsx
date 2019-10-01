@@ -8,6 +8,7 @@ import React from 'react';
  * a stateless functional component. We also removed all references to 'this'
  */
 const Like = (props) => {
+
     let classes = "fa fa-heart";
     if (!props.liked) {
         classes += "-o";
