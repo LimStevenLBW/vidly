@@ -58,12 +58,8 @@ class Movies extends Component {
         this.setState({ sortColumn });
     }
 
-    render() {
-        //object destructuring
-        //const { length: count } = this.state.movies;
-        const { pageSize, currentPage, movies: allMovies, selectedGenre, sortColumn } = this.state;
-
-        /*Steps, Filter, Sort, and then Paginate */
+    /* Steps: Filter, Sort, and then Paginate */
+    getPagedData = (selectedGenre, allMovies, currentPage, pageSize, sortColumn) => {
         //If there is a selected genre(All Genres doesnt have an id), implement a filter
         const filteredMovies = selectedGenre && selectedGenre._id ?
             allMovies.filter(movie => movie.genre._id === selectedGenre._id)
@@ -74,8 +70,18 @@ class Movies extends Component {
         //Paaginate the list
         const movies = paginate(sortedArray, currentPage, pageSize);
 
+        return {totalCount: filteredMovies.length, data: movies}
+    }
+
+    render() {
+        //object destructuring
+        //const { length: count } = this.state.movies;
+        const { pageSize, currentPage, movies: allMovies, selectedGenre, sortColumn } = this.state;
+
+        const pagedData = this.getPagedData(selectedGenre, allMovies, currentPage, pageSize, sortColumn);
+        
         //Display if no movies are available in the list
-        if (filteredMovies.length === 0) {
+        if (pagedData.count === 0) {
             return <p>
                 Looks like there aren't any movies in the database
             </p>
@@ -92,9 +98,9 @@ class Movies extends Component {
                         selectedItem={this.state.selectedGenre}
                     />
                 </div>
-                <div className="col"> <p>Showing {filteredMovies.length} movies in the database</p>
+                <div className="col"> <p>Showing {pagedData.count} movies in the database</p>
                     <MoviesTable
-                        movies={movies}
+                        movies={pagedData.data}
                         sortColumn={sortColumn}
                         onDelete={this.handleDelete}
                         onLike={this.handleLike}
@@ -102,7 +108,7 @@ class Movies extends Component {
                     />
 
                     <Pagination
-                        itemsCount={filteredMovies.length}
+                        itemsCount={pagedData.count}
                         pageSize={pageSize}
                         onPageChange={this.handlePageChange}
                         currentPage={currentPage}
