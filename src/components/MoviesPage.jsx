@@ -7,7 +7,7 @@ import { paginate } from '../utils/paginate';
 import MoviesTable from "./MoviesTable";
 import _ from 'lodash';
 
-class Movies extends Component {
+class MoviesPage extends Component {
     state = {
         movies: [],
         pageSize: 4,
@@ -81,7 +81,7 @@ class Movies extends Component {
         const pagedData = this.getPagedData(selectedGenre, allMovies, currentPage, pageSize, sortColumn);
         
         //Display if no movies are available in the list
-        if (pagedData.count === 0) {
+        if (pagedData.totalCount === 0) {
             return <p>
                 Looks like there aren't any movies in the database
             </p>
@@ -98,7 +98,7 @@ class Movies extends Component {
                         selectedItem={this.state.selectedGenre}
                     />
                 </div>
-                <div className="col"> <p>Showing {pagedData.count} movies in the database</p>
+                <div className="col"> <p>Showing {pagedData.totalCount} movies in the database</p>
                     <MoviesTable
                         movies={pagedData.data}
                         sortColumn={sortColumn}
@@ -108,7 +108,7 @@ class Movies extends Component {
                     />
 
                     <Pagination
-                        itemsCount={pagedData.count}
+                        itemsCount={pagedData.totalCount}
                         pageSize={pageSize}
                         onPageChange={this.handlePageChange}
                         currentPage={currentPage}
@@ -119,4 +119,4 @@ class Movies extends Component {
     }
 }
 
-export default Movies;
+export default MoviesPage;
