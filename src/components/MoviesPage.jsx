@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Link } from 'react-router-dom';
 import { getMovies } from "../services/fakeMovieService";
 import { getGenres } from "../services/fakeGenreService";
 import Pagination from "./common/Pagination";
@@ -12,9 +13,8 @@ class MoviesPage extends Component {
         movies: [],
         pageSize: 4,
         currentPage: 1,
-        genres: [],
         selectedGenre: null,
-        sortColumn: { path: 'title', order: 'asc' }
+        sortColumn: { path: 'title', order: 'asc' },
     }
 
     //When an instance of this component is rendered in the dom, trigger
@@ -98,7 +98,17 @@ class MoviesPage extends Component {
                         selectedItem={this.state.selectedGenre}
                     />
                 </div>
-                <div className="col"> <p>Showing {pagedData.totalCount} movies in the database</p>
+
+                <div className="col">
+                    <Link 
+                        to = "/movies/new"
+                        className = "btn btn-primary"
+                        style = {{marginBottom: "20px" }}
+                    >New Movie
+                    </Link>
+                    
+
+                    <p>Showing {pagedData.totalCount} movies in the database</p>
                     <MoviesTable
                         movies={pagedData.data}
                         sortColumn={sortColumn}
