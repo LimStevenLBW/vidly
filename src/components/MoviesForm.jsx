@@ -37,7 +37,7 @@ class MoviesForm extends Form {
     componentDidMount() {
         const genres = getGenres();
         this.setState({ genres });
-
+        
         const movieId = this.props.match.params.id; //Check URL Match
         if(movieId === "new") return; //Return immediately, since no need to populate form
 

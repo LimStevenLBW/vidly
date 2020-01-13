@@ -1,6 +1,6 @@
 import React from 'react';
 
-const FormSelect = (name, label, handler, value, options, error) => {
+const FormSelect = ({name, label, handler, value, options, error}) => {
     return ( 
         <div className = "form-group">
             <label htmlFor = {name}>
@@ -12,7 +12,7 @@ const FormSelect = (name, label, handler, value, options, error) => {
                 id = {name}
                 value = {value}
                 label = {label}
-                handler = {handler}
+                onChange = {handler}
                 className = "form-control"
             >
             
