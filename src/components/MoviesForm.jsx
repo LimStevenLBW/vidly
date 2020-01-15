@@ -8,7 +8,7 @@ class MoviesForm extends Form {
     state = {
         data: {
             title: "",
-            genre: "",
+            genreId: "",
             numberInStock: "",
             dailyRentalRate: "",
         },

@@ -6,6 +6,7 @@ import Pagination from "./common/Pagination";
 import ListGroup from "./common/ListGroup";
 import { paginate } from '../utils/paginate';
 import MoviesTable from "./MoviesTable";
+import SearchBox from "./common/SearchBox";
 import _ from 'lodash';
 
 class MoviesPage extends Component {
@@ -14,6 +15,7 @@ class MoviesPage extends Component {
         pageSize: 4,
         currentPage: 1,
         selectedGenre: null,
+        searchQuery: "",
         sortColumn: { path: 'title', order: 'asc' },
     }
 
@@ -51,20 +53,31 @@ class MoviesPage extends Component {
 
     handleGenreSelect = (genre) => {
         //Also reset current page to 1 to avoid bugs
-        this.setState({ selectedGenre: genre, currentPage: 1 })
+        this.setState({ selectedGenre: genre, searchQuery: "", currentPage: 1 })
     }
 
     handleSort = (sortColumn) => {
         this.setState({ sortColumn });
     }
 
-    /* Steps: Filter, Sort, and then Paginate */
-    getPagedData = (selectedGenre, allMovies, currentPage, pageSize, sortColumn) => {
-        //If there is a selected genre(All Genres doesnt have an id), implement a filter
-        const filteredMovies = selectedGenre && selectedGenre._id ?
-            allMovies.filter(movie => movie.genre._id === selectedGenre._id)
-            : allMovies
+    handleSearch = (query) => {
+        this.setState({ searchQuery: query});
+    }
 
+    /* Steps: Filter, Sort, and then Paginate */
+    getPagedData = (searchQuery, selectedGenre, allMovies, currentPage, pageSize, sortColumn) => {
+        //If there is a selected genre(All Genres doesnt have an id), implement a filter
+        let filteredMovies = allMovies;
+        
+        if(searchQuery){
+            filteredMovies = allMovies.filter(movie => 
+                movie.title.toLowerCase().startsWith(searchQuery.toLowerCase())
+            );
+        }
+        else if(selectedGenre && selectedGenre._id){
+            filteredMovies = allMovies.filter(movie => movie.genre._id === selectedGenre._id);
+        }
+       
         //Sort the list
         const sortedArray = _.orderBy(filteredMovies, [sortColumn.path], [sortColumn.order]);
         //Paaginate the list
@@ -76,16 +89,10 @@ class MoviesPage extends Component {
     render() {
         //object destructuring
         //const { length: count } = this.state.movies;
-        const { pageSize, currentPage, movies: allMovies, selectedGenre, sortColumn } = this.state;
+        const { searchQuery, pageSize, currentPage, movies: allMovies, selectedGenre, sortColumn } = this.state;
 
-        const pagedData = this.getPagedData(selectedGenre, allMovies, currentPage, pageSize, sortColumn);
+        const pagedData = this.getPagedData(searchQuery, selectedGenre, allMovies, currentPage, pageSize, sortColumn);
         
-        //Display if no movies are available in the list
-        if (pagedData.totalCount === 0) {
-            return <p>
-                Looks like there aren't any movies in the database
-            </p>
-        }
         //2 Column Bootstrap Layout
         return (
             <div className="row">
@@ -100,6 +107,11 @@ class MoviesPage extends Component {
                 </div>
 
                 <div className="col">
+                    <SearchBox 
+                        value = {this.state.searchQuery} 
+                        onChange = {this.handleSearch}
+                    />
+                
                     <Link 
                         to = "/movies/new"
                         className = "btn btn-primary"
@@ -107,7 +119,6 @@ class MoviesPage extends Component {
                     >New Movie
                     </Link>
                     
-
                     <p>Showing {pagedData.totalCount} movies in the database</p>
                     <MoviesTable
                         movies={pagedData.data}
@@ -122,7 +133,8 @@ class MoviesPage extends Component {
                         pageSize={pageSize}
                         onPageChange={this.handlePageChange}
                         currentPage={currentPage}
-                    /></div>
+                    />
+                </div>
 
             </div>
         );
